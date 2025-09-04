@@ -1,0 +1,22 @@
+{
+  "name": "second-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "csv-parse": "^6.1.0"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
