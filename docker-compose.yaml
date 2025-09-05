@@ -1,11 +1,11 @@
 version: '3.8'
 services:
   pumpfun-bot:
-    image: yourusername/pumpfun-bot:latest
+    build: .
+    container_name: pumpfun-bot
     volumes:
       - ./coins.csv:/app/coins.csv
-    # Optionally, mount output files:
       - ./failed_accounts.csv:/app/failed_accounts.csv
-    # You can add environment variables if needed:
+    # Optionally, add environment variables:
     # environment:
     #   - NODE_ENV=production

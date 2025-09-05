@@ -632,3 +632,7 @@ FodyWeavers.xsd
 coins.csv
 backup.csv
 failed_accounts.csv
+
+
+test-results/*
+playwright-report/*
