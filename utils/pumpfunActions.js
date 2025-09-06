@@ -23,6 +23,15 @@ export async function loginWithTwitter(page, username, email, password) {
   await page.getByRole('textbox', { name: 'Password Reveal password' }).click();
   await page.getByRole('textbox', { name: 'Password Reveal password' }).fill(password);
   await page.getByTestId('LoginForm_Login_Button').click();
+
+  // Detect confirmation email field after password
+  const confirmEmailField = page.getByTestId('ocfEnterTextTextInput');
+  if (await confirmEmailField.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false)) {
+    await confirmEmailField.click();
+    await confirmEmailField.fill(email);
+    await page.getByTestId('ocfEnterTextNextButton').click();
+  }
+
   await page.getByTestId('OAuth_Consent_Button').click();
 }
 

@@ -4,7 +4,7 @@ import { loginWithTwitter, commentOnCoin } from '../utils/pumpfunActions.js';
 import { loadCSV } from '../utils/csvLoader.js';
 
 // Set a global timeout for all tests (e.g., 180 seconds)
-test.setTimeout(180000);
+test.setTimeout(240000);
 
 const rows = loadCSV('coins.csv');
 
