@@ -1,7 +1,8 @@
+import { chromium, test } from '@playwright/test';
 import fs from 'fs';
-import { test } from '@playwright/test';
-import { loginWithTwitter, commentOnCoin } from '../utils/pumpfunActions.js';
 import { loadCSV } from '../utils/csvLoader.js';
+import proxyManager from '../utils/proxyManager.js';
+import { commentOnCoin, loginWithTwitter } from '../utils/pumpfunActions.js';
 
 // Set a global timeout for all tests (e.g., 180 seconds)
 test.setTimeout(240000);
@@ -11,9 +12,40 @@ const rows = loadCSV('coins.csv');
 // Collect failed accounts in memory
 let failedAccounts = [];
 
+// Initialize proxy manager once before all tests
+test.beforeAll(async () => {
+  test.setTimeout(240000);
+  console.log('🚀 Initializing proxy manager...');
+  await proxyManager.initialize();
+  console.log(`✅ Ready with ${proxyManager.getProxyCount()} working proxies`);
+});
+
 for (const { username, email, password, coin, comment } of rows) {
-  test(`user ${username} posts comment on coin`, async ({ page }) => {
+  test(`user ${username} posts comment on coin`, async () => {
+    let browser;
+    let page;
+
     try {
+      // Get current proxy (rotates every 5 requests automatically)
+      const proxy = proxyManager.getCurrentProxy();
+      console.log(`🌐 Using proxy: ${proxy.proxy.ip}:${proxy.proxy.port} (IP: ${proxy.ip})`);
+      console.log(`📊 Request ${proxyManager.getCurrentRequestCount() + 1}/${proxyManager.getRotationInterval()}`);
+
+      // TLDR; 
+      // Launch browser on this context to initialize proxy on request (need to research if pw can inject proxy without this.)
+
+      browser = await chromium.launch({
+        proxy: {
+          server: `http://${proxy.proxy.ip}:${proxy.proxy.port}`,
+          username: proxy.proxy.username,
+          password: proxy.proxy.password,
+        },
+        headless: true,
+      });
+
+      const context = await browser.newContext();
+      page = await context.newPage();
+
       await page.goto('https://pump.fun/board');
 
       // Login with Twitter credentials from CSV
@@ -28,10 +60,24 @@ for (const { username, email, password, coin, comment } of rows) {
 
       // Post comment
       await commentOnCoin(page, coin, comment);
+
+      console.log(`✅ Successfully completed for ${username}`);
+
+      // Rotate proxy after successful request
+      proxyManager.rotateProxy();
+
     } catch (err) {
       // Collect failed account in memory
       failedAccounts.push({ username, email, password, coin, comment });
-      console.error(`Failed for ${username}:`, err);
+      console.error(`❌ Failed for ${username}:`, err.message);
+
+      // Rotate proxy on failure, in case account failure is caused by proxy.
+      proxyManager.rotateProxy();
+    } finally {
+      // Clean up browser
+      if (browser) {
+        await browser.close();
+      }
     }
   });
 }
