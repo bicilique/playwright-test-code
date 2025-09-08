@@ -7,6 +7,7 @@ COPY package.json package-lock.json ./
 COPY playwright.config.js ./
 COPY tests/ ./tests/
 COPY utils/ ./utils/
+COPY proxies.json ./
 # COPY dist/ ./dist/  # commented out, dist folder not present
 # Do NOT copy coins.csv
 
