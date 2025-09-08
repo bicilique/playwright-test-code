@@ -636,3 +636,7 @@ failed_accounts.csv
 
 test-results/*
 playwright-report/*
+
+
+# Ignore proxies.json
+proxies.json
